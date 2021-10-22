@@ -1,0 +1,685 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>图像处理编程作业 | Asakura Yoh</title><meta name="keywords" content="img process"><meta name="author" content="asakuras"><meta name="copyright" content="asakuras"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="图像处理实验报告 一、实验一 1、验证去雾算法 实验使用的去雾算法是何凯明发表在CVPR2009年《Single Image Haze Removal Using Dark Channel Prior》的论文。文章主要基于暗通道先验来进行带雾图像的还原。   首先，在计算机视觉和计算机图形中，下述方程所描述的雾图形成模型被广泛使用： I(x)&#x3D;J(x)t(x)+A(1−t(x))(1)\mathb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="图像处理编程作业">
+<meta property="og:url" content="https://asakuras.github.io/2021/04/30/img-process/index.html">
+<meta property="og:site_name" content="Asakura Yoh">
+<meta property="og:description" content="图像处理实验报告 一、实验一 1、验证去雾算法 实验使用的去雾算法是何凯明发表在CVPR2009年《Single Image Haze Removal Using Dark Channel Prior》的论文。文章主要基于暗通道先验来进行带雾图像的还原。   首先，在计算机视觉和计算机图形中，下述方程所描述的雾图形成模型被广泛使用： I(x)&#x3D;J(x)t(x)+A(1−t(x))(1)\mathb">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/other/src=http___www.pianshen.com_images_342_b6512d6c3b703627fe65a0307567e776.png&refer=http___www.pianshen.7jloshbzic00.jpeg">
+<meta property="article:published_time" content="2021-04-30T08:57:51.000Z">
+<meta property="article:modified_time" content="2021-10-22T14:06:01.946Z">
+<meta property="article:author" content="asakuras">
+<meta property="article:tag" content="img process">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/other/src=http___www.pianshen.com_images_342_b6512d6c3b703627fe65a0307567e776.png&refer=http___www.pianshen.7jloshbzic00.jpeg"><link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/asakuras/CDN@V1.0/img/favicon.ico"><link rel="canonical" href="https://asakuras.github.io/2021/04/30/img-process/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?25c67ed3f3c7ac522ad17ed7aa28c8fb";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-10-22 22:06:01'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/asakuras/CDN@V1.0/img/avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">22</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/other/src=http___www.pianshen.com_images_342_b6512d6c3b703627fe65a0307567e776.png&amp;refer=http___www.pianshen.7jloshbzic00.jpeg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Asakura Yoh</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">图像处理编程作业</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-04-30T08:57:51.000Z" title="发表于 2021-04-30 16:57:51">2021-04-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-10-22T14:06:01.946Z" title="更新于 2021-10-22 22:06:01">2021-10-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/study/">study</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="图像处理编程作业"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="图像处理实验报告">图像处理实验报告</h3>
+<h4 id="一、实验一">一、实验一</h4>
+<p>1、验证去雾算法</p>
+<p>实验使用的去雾算法是何凯明发表在CVPR2009年《Single Image Haze Removal Using Dark Channel Prior》的论文。文章主要基于暗通道先验来进行带雾图像的还原。</p>
+<ul>
+<li>
+<p>首先，在计算机视觉和计算机图形中，下述方程所描述的雾图形成模型被广泛使用：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi mathvariant="bold">I</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mi mathvariant="bold">J</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mi>t</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>+</mo><mi mathvariant="bold">A</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>t</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(1)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\mathbf{I}(\mathbf{x})=\mathbf{J}(\mathbf{x}) t(\mathbf{x})+\mathbf{A}(1-t(\mathbf{x})) \tag{1}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">I</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">J</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">A</span></span><span class="mopen">(</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mclose">)</span></span><span class="tag"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">1</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">I</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textbf I(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord textbf">I</span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>表示输入的图像，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">J</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\textbf J(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord textbf">J</span></span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>表示要还原的图像，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">A</mtext></mrow><annotation encoding="application/x-tex">\textbf A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord text"><span class="mord textbf">A</span></span></span></span></span>表示全球大气光成分，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">t(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>表示透射率， 因此我们的目标就是要估计<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">A</mtext></mrow><annotation encoding="application/x-tex">\textbf A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord text"><span class="mord textbf">A</span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">t(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>。</p>
+</li>
+<li>
+<p>这里使用的就是暗通道进行估计<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">A</mtext></mrow><annotation encoding="application/x-tex">\textbf A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord text"><span class="mord textbf">A</span></span></span></span></span>和<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">t(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>。实际上，这是一个统计规律。暗通道就是取三通道中三者的最小值</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">k</mi></mrow><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo><mi>min</mi><mo>⁡</mo></mo><mrow><mi mathvariant="bold">y</mi><mo>∈</mo><mi mathvariant="normal">Ω</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow></munder><mrow><mo fence="true">(</mo><munder><mo><mi>min</mi><mo>⁡</mo></mo><mrow><mi>c</mi><mo>∈</mo><mo stretchy="false">{</mo><mi>r</mi><mo separator="true">,</mo><mi>g</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">}</mo></mrow></munder><msup><mi>J</mi><mi>c</mi></msup><mo stretchy="false">(</mo><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo><mo fence="true">)</mo></mrow></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(2)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">{\mathrm{dark}}(\mathbf{x})=\min _{\mathbf{y} \in \Omega(\mathbf{x})}\left(\min _{c \in\{r, g, b\}} J^{c}(\mathbf{y})\right) \tag{2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mord mathrm">d</span><span class="mord mathrm">a</span><span class="mord mathrm">r</span><span class="mord mathrm">k</span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.416em;vertical-align:-0.966em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.66786em;"><span style="top:-2.3089999999999997em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathbf mtight" style="margin-right:0.01597em;">y</span></span><span class="mrel mtight">∈</span><span class="mord mtight">Ω</span><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathbf mtight">x</span></span><span class="mclose mtight">)</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.966em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.66786em;"><span style="top:-2.3089999999999997em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span><span class="mrel mtight">∈</span><span class="mopen mtight">{</span><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">g</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">b</span><span class="mclose mtight">}</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.966em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.09618em;">J</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7143919999999999em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span><span class="tag"><span class="strut" style="height:2.416em;vertical-align:-0.966em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">2</span></span><span class="mord">)</span></span></span></span></span></span></p>
+</li>
+<li>
+<p>然后使用暗通道中前0.1%亮的像素对应的原图像素的最大值（实现中使用了平均值）作为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="bold">A</mtext></mrow><annotation encoding="application/x-tex">\textbf A</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord text"><span class="mord textbf">A</span></span></span></span></span>的估计。对于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">t(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span>的估计，使用了以下式子。</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mover accent="true"><mi>t</mi><mo>~</mo></mover><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mi>ω</mi><munder><mo><mi>min</mi><mo>⁡</mo></mo><mrow><mi mathvariant="bold">y</mi><mo>∈</mo><mi mathvariant="normal">Ω</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo></mrow></munder><mrow><mo fence="true">(</mo><munder><mo><mi>min</mi><mo>⁡</mo></mo><mi>c</mi></munder><mfrac><mrow><msup><mi>I</mi><mi>c</mi></msup><mo stretchy="false">(</mo><mi mathvariant="bold">y</mi><mo stretchy="false">)</mo></mrow><msup><mi>A</mi><mi>c</mi></msup></mfrac><mo fence="true">)</mo></mrow></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(3)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\tilde{t}(\mathbf{x})=1-\omega \min _{\mathbf{y} \in \Omega(\mathbf{x})}\left(\min _{c} \frac{I^{c}(\mathbf{y})}{A^{c}}\right) \tag{3}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.10194em;vertical-align:-0.25em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8519399999999999em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">t</span></span></span><span style="top:-3.53408em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.16666em;"><span class="mord">~</span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:2.416em;vertical-align:-0.966em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">ω</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.66786em;"><span style="top:-2.3089999999999997em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight"><span class="mord mathbf mtight" style="margin-right:0.01597em;">y</span></span><span class="mrel mtight">∈</span><span class="mord mtight">Ω</span><span class="mopen mtight">(</span><span class="mord mtight"><span class="mord mathbf mtight">x</span></span><span class="mclose mtight">)</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.966em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.66786em;"><span style="top:-2.4em;margin-left:0em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span><span class="mop">min</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.590392em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.664392em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span></span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">y</span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span><span class="tag"><span class="strut" style="height:2.416em;vertical-align:-0.966em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">3</span></span><span class="mord">)</span></span></span></span></span></span></p>
+</li>
+<li>
+<p>最终的目标公式如下。</p>
+</li>
+</ul>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi mathvariant="bold">J</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi mathvariant="bold">I</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo>−</mo><mi mathvariant="bold">A</mi></mrow><mrow><mi>max</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><mi>t</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><msub><mi>t</mi><mn>0</mn></msub><mo fence="true">)</mo></mrow></mrow></mfrac><mo>+</mo><mi mathvariant="bold">A</mi></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(4)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\mathbf{J}(\mathbf{x})=\frac{\mathbf{I}(\mathbf{x})-\mathbf{A}}{\max \left(t(\mathbf{x}), t_{0}\right)}+\mathbf{A} \tag{4}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbf">J</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.427em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mop">max</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathnormal">t</span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">)</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">I</span></span><span class="mopen">(</span><span class="mord"><span class="mord mathbf">x</span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathbf">A</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.936em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord"><span class="mord mathbf">A</span></span></span><span class="tag"><span class="strut" style="height:2.363em;vertical-align:-0.936em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">4</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p>以下是复现了上述论文主要流程的实验结果。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.6oixuuyg1w00.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.p441psh865s.jpg"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2.u7jtxn0phb4.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2.4gq20vd2duk0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/3.29e7fasp3dhc.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/3.y70gr8imngg.jpg"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/4.6kdv6az39nw0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/4.4tkxof845iq0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>分析各参数对于去雾结果的影响：</p>
+<ul>
+<li>最小值滤波窗口大小 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi></mrow><annotation encoding="application/x-tex">l</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.01968em;">l</span></span></span></span>：最小值滤波是用于暗通道的像素提取，根据实验结果可以发现，最小值滤波的窗口大小越小，图片中黑色的区域会越明显。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>size = 5</th>
+<th>size = 10</th>
+<th>size = 15</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_5.5q7wmsfn0y00.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_10.rjg77jcs7ww.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_15.6agmzl29gbg0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>size = 20</th>
+<th>size = 25</th>
+<th>size = 30</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_20.5716j7bx4hc0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_25.5nvx00jbvdo0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_sz_30.3x0mfib576k0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>控制去雾程度的参数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi></mrow><annotation encoding="application/x-tex">\omega</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">ω</span></span></span></span>：正常的大气中是存在少量雾气的，也就是说在输出的图像中，也会存在少许的雾气。从实验结果可以观察到，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ω</mi></mrow><annotation encoding="application/x-tex">\omega</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">ω</span></span></span></span>越大，去雾程度越高。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>ω = 0.5</th>
+<th>ω = 0.6</th>
+<th>ω = 0.7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_0.5.6bxm1ey664xs.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_0.6.76yhm9kqcx6o.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_0.7.3vsieiq0stmo.jpg"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>ω = 0.8</th>
+<th>ω = 0.9</th>
+<th>ω = 1.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_0.8.5235phztc480.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_0.9.ilo3usslht4.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_w_1.15uijpsjtpj4.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>2、彩色直方图均衡化</p>
+<p>直方图均衡化通常用来增加许多图像的全局对比度，尤其是当图像的有用数据的对比度相当接近的时候。通过这种方法，亮度可以更好地在直方图上分布。这样就可以用于增强局部的对比度而不影响整体的对比度，直方图均衡化通过有效地扩展常用的亮度来实现这种功能。</p>
+<p>彩色直方图均衡化，就是对于RGB三通道的图像去进行均衡化。实际上，对彩色分量rgb分别做均衡化，会产生奇异的点，图像不和谐。一般是对于YUV的V通道，Lab的L通道，HSV的V通道进行均衡化，也就是亮度通道。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_out.112zof7sqrhc.png" alt=""></p>
+<p>由于<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mn>0.30</mn><mi>R</mi><mo>+</mo><mn>0.59</mn><mi>G</mi><mo>+</mo><mn>0.11</mn><mi>B</mi></mrow><annotation encoding="application/x-tex">L=0.30R+0.59G+0.11B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">3</span><span class="mord">0</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mord">9</span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">1</span><span class="mord">1</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span>,亮度是由不同比例的RGB进行混合计算的。因此在将RGB分别进行均衡化之后，实际上并不是按照亮度比例进行均衡化，因此图像会有失真的现象，具体表现为偏蓝紫色，因为蓝色的偏多了。YUV的亮度值就是由<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mn>0.30</mn><mi>R</mi><mo>+</mo><mn>0.59</mn><mi>G</mi><mo>+</mo><mn>0.11</mn><mi>B</mi></mrow><annotation encoding="application/x-tex">L=0.30R+0.59G+0.11B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">3</span><span class="mord">0</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mord">9</span><span class="mord mathnormal">G</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord">0</span><span class="mord">.</span><span class="mord">1</span><span class="mord">1</span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span></span></span></span>的公式估计的，因此对于亮度通道进行均衡化，并不会出现失真的现象。HSV的亮度值是由<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mi>m</mi><mi>a</mi><mi>x</mi><mo stretchy="false">(</mo><mi>R</mi><mo separator="true">,</mo><mi>G</mi><mo separator="true">,</mo><mi>B</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">L=max(R,G,B)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">a</span><span class="mord mathnormal">x</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal">G</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mclose">)</span></span></span></span>估计的，因此在对于亮度进行均衡化时，会出现些许的失真。Lab的亮度值与YUV一样，所以不会出现失真的现象。</p>
+<p>3、模仿美图秀秀的功能</p>
+<ul>
+<li>祛痘美白</li>
+</ul>
+<p>我实现的祛痘美白效果的主要原理是首先对图像使用双边滤波，对图像进行一定的磨皮。然后对原图和磨皮之后的图像作差后加上128，去获取带痘的区域，将其使用高斯模糊之后，再与原图以一定的比例混合。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/girl.7d4ixjibnas0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/girl_whitening.5j9m00ll7n40.jpg"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>雕刻效果</li>
+</ul>
+<p>雕刻效果的实现与获取带痘区域的做法类似，对比相邻的两个像素，如果他们的差值加上200大于一个255或者小于0，就让他是255或者0，这样，颜色差异明显的区域就会显示成白或者黑，其他差异不明显的就会变成灰色。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/dog.4qsazuzq7ci0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/dog_carve.jxmdsuz07io.jpg"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>素描</li>
+</ul>
+<p>素描的效果是使用了反相之后的灰度图，再将其使用高斯模糊处理之后反相回去，对原图对应的灰度图除上处理过后的反相图。这样子，能够比较柔和地将边缘表现出来。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/angelina.3hw7rlwl8ro0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/angelina_sketch.6ptii9wsqgo0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>蜡笔画</li>
+</ul>
+<p>蜡笔的效果也是去提取图像的边缘，主要的方法是对原图像灰度化之后使用自适应滤波将其转为二值图后反相，边缘就会显示成白色，别的区域显示成黑色，然后原图和边缘进行与操作，就能够只保留边缘的彩色部分。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/rainbow.7at8415uh1k0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/rainbow_crayon.392rn2dde2a0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="二、实验二">二、实验二</h4>
+<p>1、实现区域生长算法并进行连通标号；求每个区域的面积，外接矩形。</p>
+<p>我所采用的区域生长算法是种子区域生长算法，首先指定不同区域的种子点，然后沿着种子点不断搜索八邻域的点，如果领域的点与种子点的像素差小于一个阈值，就认为是同一个区域，并继续搜索领域的点，如此往复。在实际操作中，我将判断一个点是否属于一个种子区域的标准改成了待判断点与该种子区域的平均像素进行比较，这样子的效果会比直接使用种子点像素比较好一些。计算每个区域的最小最大高宽，画上外接矩形，计算每个区域的像素个数，记作面积，并对每个区域标上标号。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/taiji.4uxvegno3dw0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/taiji_output.2ca6myrzonok.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/horse.50mz0qjxfjg0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/horse_output.3223xh3uznq0.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/brain.6rf7pcqw2e80.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/brain_output.61spdcxg6jk0.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>2、输入带有已知几何形状的图像，实现HOUGH变换检测直线，并定位几何图形</p>
+<p>霍夫变换运用两个坐标空间之间的变换将在一个空间中具有相同形状的曲线或直线映射到另一个坐标空间的一个点上形成峰值，从而把检测任意形状的问题转化为统计峰值问题。</p>
+<p>在这个问题中，hough变换能够检测出直线或者直线段，但是想要定位三角形矩形之类的，就需要对原图像要求比较纯净，否则应该需要配合其他手段进行检测。这里的主要思路是将图片灰度化之后，进行二值化，然后在使用canny进行边缘检测，然后对处理之后的图像应用hough变换而来。这里使用的是open cv检测直线段的函数，需要自定义最小线段的长度。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.76zkm5tnhpw0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_output.6q9yh1biqqw0.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2.4vk0ykdywbk0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2_output.hj9oeh9ufu8.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/3.3dm0rd7ylay0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/3_output.3t94x8isjs20.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>3、采用大津法实现二值化；实现动态阈值分割</p>
+<p>大津法（OTSU）是一种确定图像二值化分割阈值的算法。对于图像<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">I(x,y)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mclose">)</span></span></span></span>，前景(即目标)和背景的分割阈值记作<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span>，属于前景的像素点数占整幅图像的比例记为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ω</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">ω_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，其平均灰度<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">μ_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>；背景像素点数占整幅图像的比例为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ω</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">ω_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">ω</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，其平均灰度为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">μ_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathnormal">μ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>。图像的总平均灰度记为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi></mrow><annotation encoding="application/x-tex">μ</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal">μ</span></span></span></span>，类间方差记为g。假设图像的背景较暗，并且图像的大小为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mo>×</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">M×N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">N</span></span></span></span>，图像中像素的灰度值小于阈值<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span>的像素个数记作<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>N</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">N_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，像素灰度大于阈值<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span>的像素个数记作<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>N</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">N_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10903em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，则有：</p>
+ω_0=N_0/ M×N \tag{5}$$  $$ω_1=N_1/ M×N \tag{6} $$  $$N_0+N_1=M×N \tag{7} $$  $$ω_0+ω_1=1　　　 \tag{8} $$   $$μ=ω_0*μ_0+ω_1*μ_1\tag{9} $$ $$g=ω_0(μ_0-μ)^2+ω_1(μ_1-μ)^2 \tag{10} 
+
+<p>将式(9)代入式(10),得到等价公式,也就是类间方差: $$g=ω_0ω_1(μ_0-μ1_)^2 　　 \tag{11}$$采用遍历的方法得到使类间方差<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi></mrow><annotation encoding="application/x-tex">g</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span></span></span></span>最大的阈值<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi></mrow><annotation encoding="application/x-tex">T</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span></span></span></span>,即为所求。</p>
+<p>动态阈值分割的原理是计算局部区域的平均值，中位数，高斯加权平均值，以确定遍历图像所有区域的阈值，这里使用的是opencv的库。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>otsu</th>
+<th>dynamic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.3lfq5pryfug0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_otsu.4ppwk7q5j0g0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_dyn.3c688ukvxb80.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2.35hdwdpeers0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2_otsu.333fdf2kbwo0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/2_dyn.z5yu9oa4ghc.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>可以发现，在第一行的图中，原图的亮度分布比较均匀，因此大津法这种计算全局阈值的算法也可以有很好的效果。而在第二行的图中，原图的亮度分布不均匀，大津法计算全局阈值的算法并不能很好地处理这个问题，在光线较暗的地方，会被处理成背景黑色。而动态阈值则能很好地解决这个问题。</p>
+<p>4、实现基于数学形态学的纹理分割</p>
+<p>基于数学形态学的纹理分割可以将半径不同的图像区分开来。比如，对于一个图像中有半径不同的两种黑色圆，想要找一个分界线将两者分开，就可以使用基于数学形态学的纹理分割。</p>
+<p>首先，使用形态闭操作去消灭小圆，形态闭操作实际上是由膨胀和腐蚀组合而成。通过选择一个比小圆半径大大圆半径小的一个值，使得小圆在膨胀过程中消失。</p>
+<p>然后，使用形态开操作去使得大圆的区域变成一整块黑色区域，形态开操作实际上是由腐蚀和膨胀组合而成，通过选择一个比大圆半径还大的值，使得大圆在腐蚀的过程中消失。</p>
+<p>之后，我使用的是canny边缘检测，去检测图像的边缘。最后将原图和边缘叠加起来，就实现了区分的效果。</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>after1</th>
+<th>after2</th>
+<th>after3</th>
+<th>after4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.636izou7br80.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_after1.2kxizq8ry920.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_after2.481fldo93pk0.jpg" ></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_after3.289fx806wsbo.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_after4.1i50gbqa17b4.jpg"></td>
+</tr>
+</tbody>
+</table>
+<h4 id="三、大作业">三、大作业</h4>
+<p>1、Graph cut</p>
+<p>Graph cuts是一种十分有用和流行的能量优化算法，在计算机视觉领域普遍应用于前背景分割（Image segmentation）、立体视觉（stereo vision）、抠图（Image matting）等。此类方法把图像分割问题与图的最小割（min cut）问题相关联。假设图像的分割为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal">L</span></span></span></span>时，图像的能量可以表示为：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>E</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><mi>λ</mi><mo>⋅</mo><mi>R</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>+</mo><mi>B</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(12)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">E(A)=\lambda \cdot R(A)+B(A)\tag{12}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">λ</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span></span><span class="tag"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">1</span><span class="mord">2</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p>其中，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">R(A)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span></span></span></span>为区域项（regional term），<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">B(A)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span></span></span></span>为边界项（boundary term），而<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi></mrow><annotation encoding="application/x-tex">\lambda</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathnormal">λ</span></span></span></span>就是区域项和边界项之间的重要因子</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>R</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>n</mi><mo>∈</mo><mi mathvariant="script">P</mi></mrow></munder><msub><mi>R</mi><mi>p</mi></msub><mrow><mo fence="true">(</mo><msub><mi>A</mi><mi>p</mi></msub><mo fence="true">)</mo></mrow></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(13)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">R(A)=\sum_{n \in \mathcal{P}} R_{p}\left(A_{p}\right)\tag{13}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.3717110000000003em;vertical-align:-1.321706em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.050005em;"><span style="top:-1.8556639999999998em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mrel mtight">∈</span><span class="mord mtight"><span class="mord mathcal mtight" style="margin-right:0.08222em;">P</span></span></span></span></span><span style="top:-3.0500049999999996em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.321706em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.00773em;">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:-0.00773em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">)</span></span></span><span class="tag"><span class="strut" style="height:2.3717110000000003em;vertical-align:-1.321706em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">1</span><span class="mord">3</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>B</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mo stretchy="false">{</mo><mi>p</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">}</mo><mo>∈</mo><mi mathvariant="script">N</mi></mrow></munder><msub><mi>B</mi><mrow><mo stretchy="false">{</mo><mi>p</mi><mo separator="true">,</mo><mi>q</mi><mo stretchy="false">}</mo></mrow></msub><mo>⋅</mo><mi>δ</mi><mrow><mo fence="true">(</mo><msub><mi>A</mi><mi>p</mi></msub><mo separator="true">,</mo><msub><mi>A</mi><mi>q</mi></msub><mo fence="true">)</mo></mrow></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(14)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">B(A)=\sum_{\{p, q\} \in \mathcal{N}} B_{\{p, q\}} \cdot \delta\left(A_{p}, A_{q}\right)\tag{14}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mopen">(</span><span class="mord mathnormal">A</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.5660100000000003em;vertical-align:-1.516005em;"></span><span class="mop op-limits"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.050005em;"><span style="top:-1.808995em;margin-left:0em;"><span class="pstrut" style="height:3.05em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">{</span><span class="mord mathnormal mtight">p</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span><span class="mclose mtight">}</span><span class="mrel mtight">∈</span><span class="mord mtight"><span class="mord mathcal mtight" style="margin-right:0.14736em;">N</span></span></span></span></span><span style="top:-3.0500049999999996em;"><span class="pstrut" style="height:3.05em;"></span><span><span class="mop op-symbol large-op">∑</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.516005em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.34480000000000005em;"><span style="top:-2.5198em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">{</span><span class="mord mathnormal mtight">p</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span><span class="mclose mtight">}</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3551999999999999em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">)</span></span></span><span class="tag"><span class="strut" style="height:2.5660100000000003em;vertical-align:-1.516005em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">1</span><span class="mord">4</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable width="100%"><mtr><mtd width="50%"></mtd><mtd><mrow><mi>δ</mi><mrow><mo fence="true">(</mo><msub><mi>A</mi><mi>p</mi></msub><mo separator="true">,</mo><msub><mi>A</mi><mi>q</mi></msub><mo fence="true">)</mo></mrow><mo>=</mo><mrow><mo fence="true">{</mo><mtable rowspacing="0.15999999999999992em" columnalign="left center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>1</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext> if </mtext><msub><mi>A</mi><mi>p</mi></msub><mo mathvariant="normal">≠</mo><msub><mi>A</mi><mi>q</mi></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext> otherwise </mtext></mstyle></mtd></mtr></mtable></mrow></mrow></mtd><mtd width="50%"></mtd><mtd><mtext>(15)</mtext></mtd></mtr></mtable><annotation encoding="application/x-tex">\delta\left(A_{p}, A_{q}\right)=\left\{\begin{array}{lc}
+1 &amp; \text { if } A_{p} \neq A_{q} \\
+0 &amp; \text { otherwise }
+\end{array}\right.\tag{15}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.036108em;vertical-align:-0.286108em;"></span><span class="mord mathnormal" style="margin-right:0.03785em;">δ</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">{</span></span><span class="mord"><span class="mtable"><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span><span class="arraycolsep" style="width:0.5em;"></span><span class="col-align-c"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.45em;"><span style="top:-3.61em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord"> if </span></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="inner"><span class="mrel"></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mord mathnormal">A</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.15139200000000003em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.03588em;">q</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.286108em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.4099999999999997em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord text"><span class="mord"> otherwise </span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.9500000000000004em;"><span></span></span></span></span></span><span class="arraycolsep" style="width:0.5em;"></span></span></span><span class="mclose nulldelimiter"></span></span></span><span class="tag"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="mord text"><span class="mord">(</span><span class="mord"><span class="mord">1</span><span class="mord">5</span></span><span class="mord">)</span></span></span></span></span></span></p>
+<p>另外由于Graph Cuts需要有2个终端节点”S”和”T”，分别表示初始的目标区域和背景区域。在实际操作中，使用鼠标给定目标区域和背景区域，作为这两个区域像素分布的先验。有了能量函数的定义和初始的终端顶点，就可以采用图割理论来不断迭代对目标进行分割了。</p>
+<p>实验结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>origin</th>
+<th>processed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1.3r76um5fhzw0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/1_out.7d3n122w3800.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/4.3c70lq2mq3q0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/4_out.46von0karj20.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/5.3qr52ahkup80.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/5_out.42on29ultso0.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/6.2r1arsouqgc0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/6_out.1wtgvpcrsxfk.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/7.vm9cxxhxsgw.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/7_out.53gairam30k0.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/8.ilyqvk0qyy8.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/8_out.31jhzb3dx8q0.jpg"></td>
+</tr>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/9.3ede6rl9m5q0.jpg"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/9_out.4xhqlzhj7m80.jpg"></td>
+</tr>
+</tbody>
+</table>
+<p>GraphCut优缺点分析：<br>
+优点：一次迭代，计算速度快<br>
+缺点：需要人工标注，消耗时间，人机交互不友好，迭代一次不能进行优化，使用灰度直方图来计算彩色像素的概率，会有误差。</p>
+<p>2、SLIC超像素分割<br>
+超像素概念是2003年Xiaofeng Ren提出和发展起来的图像分割技术，是指具有相似纹理、颜色、亮度等特征的相邻像素构成的有一定视觉意义的不规则像素块。这里使用的是SLIC（simple linear iterativeclustering），即简单的线性迭代聚类。它是2010年提出的一种思想简单、实现方便的算法，将彩色图像转化为CIELAB颜色空间和XY坐标下的5维特征向量，然后对5维特征向量构造距离度量标准，对图像像素进行局部聚类的过程。<br>
+基本流程如下：</p>
+<ul>
+<li>初始化种子点（聚类中心）</li>
+<li>在种子点的n*n邻域内重新选择种子点</li>
+</ul>
+<div style="text-align: center">
+<img style="width:60%"src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/slic.3a4a687itws0.jpg"/>
+</div>
+<ul>
+<li>在每个种子点周围的邻域内为每个像素点分配类标签</li>
+<li>距离度量。包括颜色距离和空间距离</li>
+</ul>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>D</mi><mo>=</mo><msqrt><mrow><msubsup><mi>d</mi><mi>c</mi><mn>2</mn></msubsup><mo>+</mo><msup><mrow><mo fence="true">(</mo><mfrac><msub><mi>d</mi><mi>s</mi></msub><mi>S</mi></mfrac><mo fence="true">)</mo></mrow><mn>2</mn></msup><msup><mi>m</mi><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex">D=\sqrt{d_{c}^{2}+\left(\frac{d_{s}}{S}\right)^{2} m^{2}}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">D</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:3.04em;vertical-align:-1.0541359999999997em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.9858640000000003em;"><span class="svg-align" style="top:-5em;"><span class="pstrut" style="height:5em;"></span><span class="mord" style="padding-left:1em;"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.4530000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">c</span></span></span></span><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="minner"><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">s</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:1.6540080000000001em;"><span style="top:-3.9029000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathnormal">m</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.9458640000000003em;"><span class="pstrut" style="height:5em;"></span><span class="hide-tail" style="min-width:1.02em;height:3.08em;"><svg width='400em' height='3.08em' viewBox='0 0 400000 3240' preserveAspectRatio='xMinYMin slice'><path d='M473,2793
+c339.3,-1799.3,509.3,-2700,510,-2702 l0 -0
+c3.3,-7.3,9.3,-11,18,-11 H400000v40H1017.7
+s-90.5,478,-276.2,1466c-185.7,988,-279.5,1483,-281.5,1485c-2,6,-10,9,-24,9
+c-8,0,-12,-0.7,-12,-2c0,-1.3,-5.3,-32,-16,-92c-50.7,-293.3,-119.7,-693.3,-207,-1200
+c0,-1.3,-5.3,8.7,-16,30c-10.7,21.3,-21.3,42.7,-32,64s-16,33,-16,33s-26,-26,-26,-26
+s76,-153,76,-153s77,-151,77,-151c0.7,0.7,35.7,202,105,604c67.3,400.7,102,602.7,104,
+606zM1001 80h400000v40H1017.7z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:1.0541359999999997em;"><span></span></span></span></span></span></span></span></span></span></p>
+<ul>
+<li>迭代优化</li>
+</ul>
+<p>实验结果如下：</p>
+<ul>
+<li>观察迭代次数对于实验结果的影响<br>
+迭代次数1次，6次，10次进行实验（K=50,M=40)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>iteraion  1</th>
+<th>iteration  6</th>
+<th>iteration  10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K50_loop0.4y8f84at8ro0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K50_loop5.4xeajnpg3ok0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K50_loop9.4qju5gg3jua0.png"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>iteraion  1</th>
+<th>iteration  6</th>
+<th>iteration  10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop0.519te3u9lm00.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop5.22m0kb14mg8w.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop9.1klq8cl71ps0.png"></td>
+</tr>
+</tbody>
+</table>
+<p>可以发现，迭代次数越高，超像素分割的块更加整齐。</p>
+<ul>
+<li>观察K的大小对于实验结果的影响：<br>
+分别对K=50，100，200进行实验 (M=40,迭代10次)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>K = 50</th>
+<th>K = 100</th>
+<th>K = 200</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K50_loop9.3ev7s2414p60.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K100_loop9.61xbyzy61tg0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K200_loop9.3z7sdm9m20o0.png"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>K = 50</th>
+<th>K = 100</th>
+<th>K = 200</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop0.519te3u9lm00.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop5.22m0kb14mg8w.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K200_loop9.v4qeh7wjfq8.png"></td>
+</tr>
+</tbody>
+</table>
+<p>K影响的是分块个数，K有几个，分块就有几块。</p>
+<ul>
+<li>观察M的大小对于实验结果的影响：<br>
+分别对M=10，20，40进行实验 (K=50,迭代10次)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>M = 10</th>
+<th>M = 20</th>
+<th>M = 40</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M10_K50_loop9.4kt9d1i3e3o0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M20_K50_loop9.2cwjaadr1vk0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000064.jpg_M40_K50_loop9.4q68zd76dz40.png"></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>M = 10</th>
+<th>M = 20</th>
+<th>M = 40</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M10_K50_loop9.2dgthtbfdocg.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M20_K50_loop9.kyjnb2txac0.png"></td>
+<td><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/img_process/000036.jpg_M40_K50_loop9.3m9ydsb239q0.png"></td>
+</tr>
+</tbody>
+</table>
+<p>M是用于平衡像素空间距离和像素值的权重。M的大小会影响分块的工整性。M越大，分块越工整。</p>
+<p>大作业所使用的数据集均来自于https://pjreddie.com/projects/pascal-voc-dataset-mirror/中VOC2007。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">asakuras</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://asakuras.github.io/2021/04/30/img-process/">https://asakuras.github.io/2021/04/30/img-process/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://asakuras.github.io" target="_blank">Asakura Yoh</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/img-process/">img process</a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/other/src=http___www.pianshen.com_images_342_b6512d6c3b703627fe65a0307567e776.png&amp;refer=http___www.pianshen.7jloshbzic00.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/" target="_blank"><img class="post-qr-code-img" src="/"/></a><div class="post-qr-code-desc"></div></li><li class="reward-item"><a href="/" target="_blank"><img class="post-qr-code-img" src="/"/></a><div class="post-qr-code-desc"></div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/10/22/springboot2-1/"><img class="prev-cover" src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/spring_boot/v2-1b2f4bbab5617fca4bb118562ec97b4f_1440w.3sj1krbvnlu0.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Spring Boot2 学习笔记（二）：Spring Boot2基础入门</div></div></a></div><div class="next-post pull-right"><a href="/2021/04/29/erfenchazhao/"><img class="next-cover" src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/acm/src=http___image.retui8.com__url=http___mmbiz.qpic.cn_mmbiz_Kk0pAx3Zb32afwlCTUqorUXREPyXQM65Xzsickc4AhcJK1PriciaEFF8a5yjmUxkTxeNEgxbDlkMzbErXicMx7KV8Q_0_wx_fmt=jpeg.jpg&amp;refer=http___image.retui8.ohuy72sjsa8.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">二分查找</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="https://cdn.jsdelivr.net/gh/asakuras/CDN@V1.0/img/avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">asakuras</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">22</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/asakuras" target="_blank" title=""><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:asakuras@126.com" target="_blank" title=""><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">船到桥头自然直</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A"><span class="toc-number">1.</span> <span class="toc-text">图像处理实验报告</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%9E%E9%AA%8C%E4%B8%80"><span class="toc-number">1.1.</span> <span class="toc-text">一、实验一</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%AE%9E%E9%AA%8C%E4%BA%8C"><span class="toc-number">1.2.</span> <span class="toc-text">二、实验二</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%A4%A7%E4%BD%9C%E4%B8%9A"><span class="toc-number">1.3.</span> <span class="toc-text">三、大作业</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/10/22/springboot2-2/" title="Spring Boot2 学习笔记（二）：Spring Boot2基础入门"><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/spring_boot/v2-1b2f4bbab5617fca4bb118562ec97b4f_1440w.3sj1krbvnlu0.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring Boot2 学习笔记（二）：Spring Boot2基础入门"/></a><div class="content"><a class="title" href="/2021/10/22/springboot2-2/" title="Spring Boot2 学习笔记（二）：Spring Boot2基础入门">Spring Boot2 学习笔记（二）：Spring Boot2基础入门</a><time datetime="2021-10-22T12:13:57.000Z" title="发表于 2021-10-22 20:13:57">2021-10-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/10/22/springboot2-1/" title="Spring Boot2 学习笔记（二）：Spring Boot2基础入门"><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/spring_boot/v2-1b2f4bbab5617fca4bb118562ec97b4f_1440w.3sj1krbvnlu0.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring Boot2 学习笔记（二）：Spring Boot2基础入门"/></a><div class="content"><a class="title" href="/2021/10/22/springboot2-1/" title="Spring Boot2 学习笔记（二）：Spring Boot2基础入门">Spring Boot2 学习笔记（二）：Spring Boot2基础入门</a><time datetime="2021-10-22T12:05:03.000Z" title="发表于 2021-10-22 20:05:03">2021-10-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/30/img-process/" title="图像处理编程作业"><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/other/src=http___www.pianshen.com_images_342_b6512d6c3b703627fe65a0307567e776.png&amp;refer=http___www.pianshen.7jloshbzic00.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="图像处理编程作业"/></a><div class="content"><a class="title" href="/2021/04/30/img-process/" title="图像处理编程作业">图像处理编程作业</a><time datetime="2021-04-30T08:57:51.000Z" title="发表于 2021-04-30 16:57:51">2021-04-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/29/erfenchazhao/" title="二分查找"><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/acm/src=http___image.retui8.com__url=http___mmbiz.qpic.cn_mmbiz_Kk0pAx3Zb32afwlCTUqorUXREPyXQM65Xzsickc4AhcJK1PriciaEFF8a5yjmUxkTxeNEgxbDlkMzbErXicMx7KV8Q_0_wx_fmt=jpeg.jpg&amp;refer=http___image.retui8.ohuy72sjsa8.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="二分查找"/></a><div class="content"><a class="title" href="/2021/04/29/erfenchazhao/" title="二分查找">二分查找</a><time datetime="2021-04-29T13:15:04.000Z" title="发表于 2021-04-29 21:15:04">2021-04-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2020/10/13/leetcode1024/" title="LeetCode 1024 区间覆盖"><img src="https://cdn.jsdelivr.net/gh/asakuras/image_hosting@master/acm/src=http___pic4.zhimg.com_v2-ba7a4221b1a3b2bff25b111dfa1c559f_1440w.jpg_source=172ae18b&amp;refer=http___pic4.zhimg.61jqswpaijs0.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LeetCode 1024 区间覆盖"/></a><div class="content"><a class="title" href="/2020/10/13/leetcode1024/" title="LeetCode 1024 区间覆盖">LeetCode 1024 区间覆盖</a><time datetime="2020-10-13T14:19:09.000Z" title="发表于 2020-10-13 22:19:09">2020-10-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By asakuras</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><div class="js-pjax"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/copy-tex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/copy-tex.css"><script>(() => {
+  document.querySelectorAll('#article-container span.katex-display').forEach(item => {
+    btf.wrap(item, 'div', '', 'katex-wrap')
+  })
+})()</script></div><script id="canvas_nest" defer="defer" color="238,121,159" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"superSample":2,"width":150,"height":320,"position":"right","hOffset":0,"vOffset":-20},"mobile":{"show":true,"scale":0.5},"log":false});</script></body></html>
